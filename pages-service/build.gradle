@@ -32,6 +32,7 @@ dependencies {
     compile group: 'com.google.apis', name: 'google-api-services-drive', version: 'v3-rev26-1.22.0'
     compile group: 'com.google.api-client', name: 'google-api-client', version: '1.22.0'
     compile group: 'com.google.apis', name: 'google-api-services-oauth2', version: 'v2-rev110-1.22.0'
+    compile group: 'org.freemarker', name: 'freemarker', version: '2.3.20'
     testCompile("junit:junit")
 }
 

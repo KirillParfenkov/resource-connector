@@ -6,17 +6,17 @@
         </encoder>
     </appender>
 
-   <!-- <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>google.out.log</file>
+   <appender name="FILE" class="ch.qos.logback.core.FileAppender">
+        <file>out.log</file>
         <append>true</append>
         <encoder>
-            <pattern>${FILE_LOG_PATTERN}</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
 
-    <logger name="by.silicium.service.file.google" level="DEBUG">
+    <logger name="by.silicium.service.file.google" level="INFO">
         <appender-ref ref="FILE"/>
-    </logger> -->
+    </logger>
 
     <root level="DEBUG">
         <appender-ref ref="STDOUT"/>

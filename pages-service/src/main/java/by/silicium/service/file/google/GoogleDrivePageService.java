@@ -50,6 +50,7 @@ public class GoogleDrivePageService implements PageService {
     private static String Q_FOLDER_MIME_TYPE = "mimeType = 'application/vnd.google-apps.folder'";
     private static String Q_FILE_MIME_TYPE = "mimeType = 'application/vnd.google-apps.file'";
     private static String DRIVE_SPACE= "drive";
+    private static String FIELDS = "files(id, name, parents)";
 
     /** Directory to store user credentials for this application. */
     private static final java.io.File CLIENT_SECRET = new java.io.File(
@@ -96,10 +97,13 @@ public class GoogleDrivePageService implements PageService {
             File folder = getFolder(path);
             Drive.Files.List resultList = driveService.files().list();
 
-            if (folder != null) {
-                resultList.setQ("'"+ folder.getId() + "'" + " in parents")
-                        .setPageSize(DEFAULT_PAGE_SIZE);
+            if (folder == null) {
+                // Return empty list.
+                return pages;
             }
+
+            resultList.setQ("'"+ folder.getId() + "'" + " in parents")
+                    .setPageSize(DEFAULT_PAGE_SIZE);
 
             FileList files;
 
@@ -143,6 +147,7 @@ public class GoogleDrivePageService implements PageService {
             Drive.Files.List resultListForFolders = driveService.files().list();
             resultListForFolders.setQ(Q_FOLDER_MIME_TYPE + " and (" + constructFolderFilter(folderNameList) + ")");
             resultListForFolders.setSpaces(DRIVE_SPACE);
+            resultListForFolders.setFields(FIELDS);
             resultListForFolders.setPageSize(DEFAULT_PAGE_SIZE);
 
             FileList folderList;
@@ -163,26 +168,27 @@ public class GoogleDrivePageService implements PageService {
                     resultListForFolders.getPageToken().length() > 0);
 
             List<File> list;
-            String parentId = null;
             File lastFolder = null;
+            boolean isPathExists = false;
             for(int i = 0; i < folderNameList.size(); i++) {
 
                 list = folderMap.get(folderNameList.get(i));
-                if (list == null && list.size() > 0) {
+                if (list == null && list.isEmpty()) {
                     return null;
                 }
 
                 // Checking of the hierarchy
+                isPathExists = false;
                 for(File file: list) {
-                    if ( i == 0 && file.getParents() == null) {
-                        parentId = file.getId();
-                    } else if (i > 0 && parentId == file.getId()) {
-                        parentId = file.getId();
+                    if ((i == 0 && file.getParents() == null) ||
+                            (i > 0 && file.getParents().contains(lastFolder.getId()))) {
+                        lastFolder = file;
+                        isPathExists = true;
+                        break;
                     }
-                    lastFolder = file;
                 }
 
-                if (lastFolder == null) {
+                if(!isPathExists) {
                     return null;
                 }
             }

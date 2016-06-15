@@ -17,8 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -204,7 +203,24 @@ public class GoogleDrivePageService implements PageService {
 
     @Override
     public Page getPageById(String id) {
-        return null;
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        String content = null;
+        try {
+            driveService.files().export(id, "text/html")
+                    .executeMediaAndDownloadTo(outputStream);
+
+            content = new String(outputStream.toByteArray());
+
+        } catch (IOException e) {
+            logger.error(e.toString());
+        }
+
+        Page page = new Page();
+        page.setId(id);
+        page.setContent(content);
+
+        return page;
     }
 
     @Override
